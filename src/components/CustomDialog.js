@@ -20,6 +20,18 @@ export default function CustomDialog({ open, children, title, contentText, handl
         {/* <Button onClick={handleClose}>Cancel</Button> */}
         <Button onClick={handleContinue}>Continue</Button>
       </DialogActions>
+
+
+
+
+
+
+
+
+
+
+
+      
     </Dialog>
   );
 }
