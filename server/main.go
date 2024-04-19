@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -32,7 +31,6 @@ type Game struct {
 }
 
 var client *mongo.Client
-var upgrader = websocket.Upgrader{}
 
 func main() {
 	// Load environment variables
@@ -104,16 +102,6 @@ func getCollection() *mongo.Collection {
 	return client.Database("chess").Collection("games")
 }
 
-// func testCollection() *mongo.Collection {
-// 	err = client.Ping(context.TODO(), nil)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println("Connected to MongoDB!")
-// 	return client.Database("Chess").Collection("sample_data")
-
-// }
-
 func createGame(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	log.Printf("Received request: %s %s", r.Method, r.URL.Path)
@@ -143,33 +131,6 @@ func createGame(w http.ResponseWriter, r *http.Request) {
 	game.ID = result.InsertedID.(primitive.ObjectID).Hex()
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(game)
-}
-
-// // Handler function to create a new game
-func handleWebSocket(conn *websocket.Conn) {
-	log.Println("Client connected:", conn.RemoteAddr())
-
-	// Listen to "username" event from client
-	conn.SetCloseHandler(func(code int, text string) error {
-		log.Printf("Client disconnected: %s\n", conn.RemoteAddr())
-		return nil
-	})
-
-	// Handle incoming messages from client
-	for {
-		var msg map[string]interface{}
-		err := conn.ReadJSON(&msg)
-		if err != nil {
-			log.Println("Error reading message:", err)
-			return
-		}
-
-		if event, ok := msg["event"].(string); ok && event == "username" {
-			if username, ok := msg["data"].(string); ok {
-				log.Println("Username received:", username)
-			}
-		}
-	}
 }
 
 // Handler function to get a game by ID

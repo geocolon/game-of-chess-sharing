@@ -1,14 +1,28 @@
-import { useState } from "react";
 import { Container, TextField } from "@mui/material";
 import Game from "./Game";
-import socket from './socket';
 import CustomDialog from "./components/CustomDialog";
+import { useDispatch, useSelector } from 'react-redux';
+import { setUsername, setUsernameSubmitted } from './Actions/GameAction';
 
 export default function App() {
-  const [username, setUsername] = useState('');
+  const player1 = useSelector(state => state.player1);
+  const usernameSubmitted = useSelector(state => state.usernameSubmitted);
+  const dispatch = useDispatch();
+  
 
-  // Indicates if a username has been submitted
-  const [usernameSubmitted, setUsernameSubmitted] = useState(false);
+  const handleUsernameChange = (e) => {
+    dispatch(setUsername(e.target.value));
+  };
+
+  const handleContinue = () => {
+    if (!player1) {
+      console.log("Username not entered. Please enter a username.");
+      return;
+    }
+    console.log("Sending username to server:", player1);
+    // Assuming you have socket.io or any other logic here
+    dispatch(setUsernameSubmitted(true));
+  };
 
   return (
     <Container>
@@ -16,77 +30,27 @@ export default function App() {
         open={!usernameSubmitted} // Leave open if username has not been selected
         title="Pick a username" // Title of dialog
         contentText="Please select a username" // Content text of dialog
-        handleContinue={() => { // Fired when "Continue" is clicked
-          if (!username) {
-            console.log("Username not entered. Please enter a username.");
-            return; // If username hasn't been entered, do nothing
-          }
-          console.log("Sending username to server:", username);
-          socket.emit("username", username); // Emit a WebSocket event called "username" with the username as data
-          setUsernameSubmitted(true); // Indicate that username has been submitted
-        }}
+        handleContinue={handleContinue}
       >
         <TextField // Input
           autoFocus // Automatically set focus on input (make it active).
           margin="dense"
-          id="username"
-          label="Username"
-          name="username"
-          value={username}
+          id="player1"
+          label="Player1"
+          name="Player1"
+          value={player1}
           required
-          onChange={(e) => {
-            console.log("Username changed:", e.target.value);
-            setUsername(e.target.value); // Update username state with value
-          }}
           type="text"
           fullWidth
           variant="standard"
+          onChange={(e) => {
+            console.log("Username changed:", e.target.value);
+            handleUsernameChange(e); // Update username state with value
+          }}
+          
         />
       </CustomDialog>
       <Game />
     </Container>
   );
 }
-
-// import { useState } from "react";
-// import { Container, TextField } from "@mui/material";
-// import Game from "./Game";
-// import socket from './socket';
-// import CustomDialog from "./components/CustomDialog";
-
-// export default function App() {
-//   const [username, setUsername] = useState('');
-
-//   // indicates if a username has been submitted
-//   const [usernameSubmitted, setUsernameSubmitted] = useState(false);
-
-//   return (
-//     <Container>
-//       <CustomDialog
-//         open={!usernameSubmitted} // leave open if username has not been selected
-//         title="Pick a username" // Title of dialog
-//         contentText="Please select a username" // content text of dialog
-//         handleContinue={() => { // fired when continue is clicked
-//           if (!username) return; // if username hasn't been entered, do nothing
-//           socket.emit("username", username); // emit a websocket event called "username" with the username as data
-//           setUsernameSubmitted(true); // indicate that username has been submitted
-//         }}
-//       >
-//         <TextField // Input
-//           autoFocus // automatically set focus on input (make it active).
-//           margin="dense"
-//           id="username"
-//           label="Username"
-//           name="username"
-//           value={username}
-//           required
-//           onChange={(e) => setUsername(e.target.value)} // update username state with value
-//           type="text"
-//           fullWidth
-//           variant="standard"
-//         />
-//       </CustomDialog>
-//       <Game />
-//     </Container>
-//   );
-// }
