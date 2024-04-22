@@ -72,21 +72,20 @@ func main() {
 
 	// Initialize router
 	router := mux.NewRouter()
-	http.HandleFunc("/ws", handleWebSocket)
-	http.ListenAndServe(":8080", nil)
-
-	// Define API endpoints
-	// router.HandleFunc("/games", getGames).Methods("GET")
-	router.HandleFunc("/games", createGame).Methods("POST")
-	router.HandleFunc("/games/{id}", getGame).Methods("GET")
-	router.HandleFunc("/games/{id}", updateGame).Methods("PUT")
-	router.HandleFunc("/games/{id}", deleteGame).Methods("DELETE")
 
 	// Set up CORS middleware
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:3000"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
 	})
+
+	// Define API endpoints
+	// router.HandleFunc("/games", getGames).Methods("GET")
+	router.HandleFunc("/ws", handleWebSocket).Methods("GET")
+	router.HandleFunc("/games", createGame).Methods("POST")
+	router.HandleFunc("/games/{id}", getGame).Methods("GET")
+	router.HandleFunc("/games/{id}", updateGame).Methods("PUT")
+	router.HandleFunc("/games/{id}", deleteGame).Methods("DELETE")
 
 	// Wrap the router with CORS middleware
 	handler := c.Handler(router)
