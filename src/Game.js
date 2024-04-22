@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react"; // <- 1 useEffect
+import React, { useState, useMemo, useCallback } from "react"; // <- 1 useEffect
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import CustomDialog from "./components/CustomDialog";

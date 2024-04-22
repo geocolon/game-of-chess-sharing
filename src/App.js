@@ -1,10 +1,38 @@
-import { Container, TextField } from "@mui/material";
+import React, { useEffect } from "react";
+import{ Container, TextField } from "@mui/material";
 import Game from "./Game";
 import CustomDialog from "./components/CustomDialog";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, connect } from 'react-redux';
+import io from 'socket.io-client';
+import { setWebSocketConnection, receiveMessage } from './Actions/SocketAction';
 import { setUsername, setUsernameSubmitted } from './Actions/GameAction';
 
-export default function App() {
+const socket = io('http://localhost:8080');
+
+const App = ({ webSocketConnected, messages, setWebSocketConnection, receiveMessage }) => {
+  useEffect(() => {
+    socket.on('connect', () => {
+        setWebSocketConnection(true);
+    });
+
+    socket.on('message', (data) => {
+        receiveMessage(data);
+    });
+
+    socket.on('disconnect', () => {
+        setWebSocketConnection(false);
+    });
+
+    return () => {
+        socket.disconnect();
+    };
+  }, [])
+
+  const sendMessage = () => {
+    const data = { message: 'Hello from client' }; // Data to be sent
+    socket.emit('message', 'Hello from client');
+};
+
   const player1 = useSelector(state => state.player1);
   const usernameSubmitted = useSelector(state => state.usernameSubmitted);
   const dispatch = useDispatch();
@@ -30,7 +58,7 @@ export default function App() {
         open={!usernameSubmitted} // Leave open if username has not been selected
         title="Pick a username" // Title of dialog
         contentText="Please select a username" // Content text of dialog
-        handleContinue={handleContinue}
+        handleContinue={handleContinue()}
       >
         <TextField // Input
           autoFocus // Automatically set focus on input (make it active).
@@ -50,7 +78,33 @@ export default function App() {
           
         />
       </CustomDialog>
+      <div>
+            {webSocketConnected ? (
+                <div>
+                    <button onClick={sendMessage}>Send Message</button>
+                    <ul>
+                        {messages.map((message, index) => (
+                            <li key={index}>{message}</li>
+                        ))}
+                    </ul>
+                </div>
+            ) : (
+                <div>WebSocket disconnected</div>
+            )}
+        </div>
       <Game />
     </Container>
   );
 }
+
+const mapStateToProps = (state) => ({
+  webSocketConnected: state.webSocketConnected,
+  messages: state.messages,
+});
+
+const mapDispatchToProps = {
+  setWebSocketConnection,
+  receiveMessage,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

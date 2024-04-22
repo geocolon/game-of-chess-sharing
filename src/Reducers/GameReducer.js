@@ -2,7 +2,7 @@
 const initialState = {
   player1: '',
   usernameSubmitted: false
-};
+}; 
 const gameReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_USERNAME':

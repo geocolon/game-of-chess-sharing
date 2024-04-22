@@ -1,7 +1,7 @@
 import { Button, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import CustomDialog from "./components/CustomDialog";
-import socket from './socket';
+import { io } from "socket.io-client";
 import { useDispatch } from 'react-redux';
 import { setGameId } from './Reducers/GameReducer';
 

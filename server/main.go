@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,6 +32,7 @@ type Game struct {
 }
 
 var client *mongo.Client
+var upgrader = websocket.Upgrader{}
 
 func main() {
 	// Load environment variables
@@ -70,6 +72,8 @@ func main() {
 
 	// Initialize router
 	router := mux.NewRouter()
+	http.HandleFunc("/ws", handleWebSocket)
+	http.ListenAndServe(":8080", nil)
 
 	// Define API endpoints
 	// router.HandleFunc("/games", getGames).Methods("GET")
@@ -100,6 +104,27 @@ func main() {
 // Helper function to get the MongoDB collection
 func getCollection() *mongo.Collection {
 	return client.Database("chess").Collection("games")
+}
+
+func handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		// Handle error
+		return
+	}
+	defer conn.Close()
+
+	// WebSocket connection established, handle messages
+	for {
+		messageType, message, err := conn.ReadMessage()
+		if err != nil {
+			// Handle error
+			break
+		}
+		// Process message
+		_ = messageType
+		_ = message
+	}
 }
 
 func createGame(w http.ResponseWriter, r *http.Request) {
